@@ -70,13 +70,17 @@ def predict(df):
     df = df.reset_index(drop=True)
     df['Idx'] = df.index.values
     X = df[['Idx']]
-    y = df[['Close']]
+    y = df['Close']  # ✅ fix: use Series, not DataFrame
     model = LinearRegression().fit(X, y)
+
     next_idx = np.array([[df['Idx'].iloc[-1] + 1]])
     fifth_idx = np.array([[df['Idx'].iloc[-1] + 5]])
-    npred = float(model.predict(next_idx))
-    fpred = float(model.predict(fifth_idx))
-    direction = "UP" if npred > df['Close'].iloc[-1] else "DOWN"
+
+    npred = float(model.predict(next_idx)[0])
+    fpred = float(model.predict(fifth_idx)[0])
+    
+    last_close = float(df['Close'].iloc[-1])  # ✅ fix: convert to float for comparison
+    direction = "UP" if npred > last_close else "DOWN"
     acc = round(model.score(X, y) * 100, 2)
     return npred, fpred, direction, acc
 
